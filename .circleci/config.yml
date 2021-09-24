@@ -9,19 +9,23 @@ jobs:
     - image: amazon/aws-cli
     steps:
     - checkout
-    - run: 
-        name: set aws access key id
-        command: AWS_ACCESS_KEY_ID=AKIA6CMCJEPTLWEMKC65
-    - run:
-        name: set aws secret access key
-        command: AWS_SECRET_ACCESS_KEY=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
-    - run:
-        name: set aws default region
-        command: AWS_DEFAULT_REGION=us-east-1
+    # - run: 
+    #     name: set aws access key id
+    #     command: AWS_ACCESS_KEY_ID=AKIA6CMCJEPTLWEMKC65
+    # - run:
+    #     name: set aws secret access key
+    #     command: AWS_SECRET_ACCESS_KEY=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
+    # - run:
+    #     name: set aws default region
+    #     command: AWS_DEFAULT_REGION=us-east-1
     - run:
         name: create cloudformation stack
         command: |
-          aws cloudformation create-stack --stack-name cicd-ansible-cf  --template-body file://cloudformation/template.yml --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region us-east-1
+          aws cloudformation create-stack \
+            --stack-name cicd-ansible-cf-${CIRCLE_WORKFLOW_ID:0:7} \
+            --template-body file://cloudformation/template.yml \
+            --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
+            --region us-east-1
 
 workflows:
   ansible:
