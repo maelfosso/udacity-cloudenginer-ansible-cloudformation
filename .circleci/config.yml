@@ -21,7 +21,7 @@ jobs:
     - run:
         name: create cloudformation stack
         command: |
-          aws cloudformation create-stack --stack-name cicd-ansible-cf  --template-body file://cloudformation/template.yml --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"
+          aws cloudformation create-stack --stack-name cicd-ansible-cf  --template-body file://cloudformation/template.yml --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region us-east-1
 
 workflows:
   ansible:
