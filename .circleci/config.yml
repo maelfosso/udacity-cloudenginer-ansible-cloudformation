@@ -8,6 +8,7 @@ jobs:
     docker:
     - image: amazon/aws-cli
     steps:
+    - checkout
     - run: 
         name: set aws access key id
         command: AWS_ACCESS_KEY_ID=AKIA6CMCJEPTLWEMKC65
@@ -20,7 +21,7 @@ jobs:
     - run:
         name: create cloudformation stack
         command: |
-          aws cloudformation create-stack --stack-name cicd-ansible-cf  --template-body=file:///cloudformation/template.yml --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"
+          aws cloudformation create-stack --stack-name cicd-ansible-cf  --template-body file://cloudformation/template.yml --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"
 
 workflows:
   ansible:
