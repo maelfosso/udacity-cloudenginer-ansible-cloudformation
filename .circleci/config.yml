@@ -34,8 +34,23 @@ jobs:
         name: configure the server with ansible
         command: |
           ansible-playbook -i inventory.txt main-remote.yml
+
+  smoke_test:
+    docker: 
+      - alpine
+    steps:
+      run: 
+        name: smoking test
+        command: |
+          if curl -s --head http://google.com
+          then
+            echo "it passed"
+          else
+            echo "it failed"
+
 workflows:
   ansible:
     jobs:
-      - create_infrastructure
-      - configure_infrastructure
+      # - create_infrastructure
+      # - configure_infrastructure
+      - smoke_test
