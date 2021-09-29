@@ -4,11 +4,12 @@ orbs:
   aws-cli: circleci/aws-cli@2.0.3
 
 commands:
-  destroy_environments:
+  destroy_environment:
     description: destroy the cloudformation environment
     steps:
       - run:
           name: delete cf environment
+          when: on_fail
           command: |
             aws cloudformation delete-stack \
               --stack-name cicd-ansible-cf-${CIRCLE_WORKFLOW_ID:0:7}
@@ -53,8 +54,7 @@ jobs:
           name: failed step
           command: |
             return 1
-      - destroy_environments
-        when: on_fail
+      - destroy_environment
 
 workflows:
   ansible:
