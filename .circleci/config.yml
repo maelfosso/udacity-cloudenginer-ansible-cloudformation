@@ -47,7 +47,8 @@ jobs:
               echo "it passed"
             else
               echo "it failed"
-
+            fi
+            
 workflows:
   ansible:
     jobs:
