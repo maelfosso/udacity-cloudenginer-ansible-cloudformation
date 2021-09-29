@@ -3,6 +3,16 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@2.0.3
 
+commands:
+  destroy_environments:
+    description: destroy the cloudformation environment
+    steps:
+      - run:
+          name: delete cf environment
+          command: |
+            aws cloudformation delete-stack \
+              --stack-name cicd-ansible-cf-${CIRCLE_WORKFLOW_ID:0:7}
+  
 jobs:
   create_infrastructure:
     docker:
@@ -37,25 +47,18 @@ jobs:
 
   smoke_test:
     docker: 
-      - image: alpine:latest
+      - image: amazon/aws-cli
     steps:
       - run:
-          name: installing curl
+          name: failed step
           command: |
-            apk add --update curl
-      - run: 
-          name: smoking test
-          command: |
-            if curl -s --head "http://google.com"
-            then
-              echo "it passed"
-            else
-              echo "it failed"
-            fi
+            return 1
+      - destroy_environments
+        when: on_fail
 
 workflows:
   ansible:
     jobs:
-      # - create_infrastructure
+      - create_infrastructure
       # - configure_infrastructure
       - smoke_test
