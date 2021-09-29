@@ -39,6 +39,10 @@ jobs:
     docker: 
       - image: alpine:latest
     steps:
+      - run:
+          name: installing curl
+          command: |
+            apk add --update curl
       - run: 
           name: smoking test
           command: |
@@ -48,7 +52,7 @@ jobs:
             else
               echo "it failed"
             fi
-            
+
 workflows:
   ansible:
     jobs:
