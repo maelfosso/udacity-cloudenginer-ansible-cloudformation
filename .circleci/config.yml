@@ -111,7 +111,7 @@ jobs:
     steps:
       - checkout
       - run: yum install -y tar gzip
-      - attack_workspace:
+      - attach_workspace:
           at: ~/
       - run:
           name: destroy the previous production version's S3 bucket and CloudFormation stack.
