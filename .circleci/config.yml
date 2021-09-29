@@ -53,7 +53,12 @@ jobs:
       - run:
           name: failed step
           command: |
-            return 1
+            if curl -s --head maelfosso.com
+            then
+              return 0
+            else
+              return 1
+            fi
       - destroy_environment
 
 workflows:
