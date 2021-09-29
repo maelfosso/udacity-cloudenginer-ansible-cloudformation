@@ -61,11 +61,82 @@ jobs:
             fi
       - destroy_environment
 
+  create_and_deploy_front_end:
+    docker:
+    - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run
+          name: Execute bucket.yml - Create cloudformation stack
+          command: |
+            aws cloudformation deploy \
+              --template-file bucket.yml \
+              --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides MyBucketName="my-bucket-967177741286-${CIRCLE_WORKFLOW_ID:0.7}" \
+              --region us-east-1
+
+  get_last_deployment_id:
+    docker:
+      - image: amazon/aws-cli 
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - run:
+          name: Fetch and save the old pipeline ID (bucket name) responsible for the last release
+          command: |
+            aws cloudformation \
+              list-exports --query "Exports[?Name==\`PipelineID\`].Value" \
+              --no-paginate --output text --region us-east-1 > ~/textfile
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - textfile.txt
+
+  promote_to_production:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Execute cloudfront.yml
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/cloudfront.yml \
+              --stack-name production-distro --region us-east-1 \
+              --parameter-overrides PipelineID="my-bucket-967177741286-${CIRCLE_WORKFLOW_ID:0.7}"
+
+  clean_up_old_front_end:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - attack_workspace:
+          at: ~/
+      - run:
+          name: destroy the previous production version's S3 bucket and CloudFormation stack.
+          command: |
+            export OldBucketID=$(cat ~/textfile.txt)
+            aws s3 rm "s3://${OldBucketID}" --recursive
+            aws cloudformation delete-stack production-distro --region us-east-1
+
+    
 workflows:
   ansible:
     jobs:
-      - create_infrastructure
+      # - create_infrastructure
       # - configure_infrastructure
-      - smoke_test:
-          requires: 
-            - create_infrastructure
+      # - smoke_test:
+      #     requires: 
+      #       - create_infrastructure
+      - get_last_deployment_id
+      - clean_up_old_front_end
+          requires:
+            - get_last_deployment_id
+      - create_and_deploy_front_end:
+          requires:
+            - clean_up_old_front_end
+      - promote_to_production:
+          requires:
+            - create_and_deploy_front_end
+
