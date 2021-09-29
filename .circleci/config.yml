@@ -37,12 +37,12 @@ jobs:
 
   smoke_test:
     docker: 
-      - alpine
+      - image: alpine:latest
     steps:
       run: 
         name: smoking test
         command: |
-          if curl -s --head http://google.com
+          if curl -s --head "http://google.com"
           then
             echo "it passed"
           else
